@@ -15,6 +15,8 @@ import Gallery from './pages/Gallery';
 import FAQ from './pages/FAQ';
 import Testimonials from './pages/Testimonials';
 import Contact from './pages/Contact';
+import Cart from './pages/Cart';
+import Checkout from './pages/Checkout';
 
 function ServiceWorkerRegistrar() {
   useEffect(() => {
@@ -42,11 +44,12 @@ export default function App() {
             <Route path="/about" element={<About />} />
             <Route path="/shop" element={<Services />} />
             <Route path="/services" element={<Services />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/checkout" element={<Checkout />} />
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/testimonials" element={<Testimonials />} />
             <Route path="/contact" element={<Contact />} />
-            {/* Catch-all → Home */}
             <Route path="*" element={<Home />} />
           </Routes>
         </main>
@@ -54,7 +57,6 @@ export default function App() {
         <Footer />
       </div>
 
-      {/* Global utility components */}
       <FloatingWhatsApp />
       <PWAInstall />
       <MobileBottomMenu />
