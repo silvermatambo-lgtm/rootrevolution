@@ -3,17 +3,18 @@ import { Link } from 'react-router-dom';
 import { Mail } from 'lucide-react';
 import { cartTotal, getCart, type CartItem } from '../lib/cart';
 
-const ORDER_EMAIL='info@Goodlifeolution.co.za';
+const ORDER_EMAIL='info@rootrevolution.co.za';
 
 export default function Checkout(){
   const [items,setItems]=useState<CartItem[]>([]);
+  const [mailHref,setMailHref]=useState(`mailto:${ORDER_EMAIL}`);
   useEffect(()=>setItems(getCart()),[]);
   const total=useMemo(()=>cartTotal(items),[items]);
 
-  const buildMailto=()=>{
+  const prepareEmail=()=>{
     const form=document.getElementById('root-order-form') as HTMLFormElement | null;
-    if(!form) return `mailto:${ORDER_EMAIL}`;
-    if(!form.reportValidity()) return null;
+    if(!form) return true;
+    if(!form.reportValidity()) return false;
     const fd=new FormData(form);
     const lines=items.map(i=>`• ${i.name} x${i.quantity} — R${i.price*i.quantity}`);
     const body=[
@@ -29,12 +30,10 @@ export default function Checkout(){
       `Postal Code: ${fd.get('postal')||''}`,
       `Notes: ${fd.get('notes')||'None'}`
     ].join('\n');
-    return `mailto:${ORDER_EMAIL}?subject=${encodeURIComponent('Root Revolution Order')}&body=${encodeURIComponent(body)}`;
-  };
-
-  const openEmail=()=>{
-    const mailto=buildMailto();
-    if(mailto) window.location.assign(mailto);
+    const href=`mailto:${ORDER_EMAIL}?subject=${encodeURIComponent('Root Revolution Order')}&body=${encodeURIComponent(body)}`;
+    setMailHref(href);
+    window.location.href=href;
+    return true;
   };
 
   return <div className="pt-28 pb-20 bg-stone-50 min-h-screen"><div className="max-w-6xl mx-auto px-4 grid lg:grid-cols-[1fr_380px] gap-7">
@@ -42,7 +41,7 @@ export default function Checkout(){
       <span className="section-tag">Order Root Revolution Products</span>
       <h1 className="text-4xl md:text-5xl font-bold text-emerald-950">Complete Your Order</h1>
       {!items.length?<div className="bg-white rounded-3xl p-8 border mt-8"><p className="font-bold text-lg">Your cart is empty.</p><Link to="/shop" className="text-emerald-700 font-bold inline-block mt-3">Return to shop →</Link></div>:<>
-      <form id="root-order-form" onSubmit={(e)=>e.preventDefault()} className="bg-white rounded-3xl border border-stone-100 shadow-sm p-6 mt-8">
+      <form id="root-order-form" onSubmit={(e)=>{e.preventDefault();prepareEmail();}} className="bg-white rounded-3xl border border-stone-100 shadow-sm p-6 mt-8">
         <h2 className="text-xl font-bold text-emerald-950">Customer & Delivery Details</h2>
         <div className="grid md:grid-cols-2 gap-4 mt-5">
           <input required name="name" placeholder="Full name" className="border rounded-xl px-4 py-3"/>
@@ -55,10 +54,9 @@ export default function Checkout(){
           <input name="postal" placeholder="Postal code" className="border rounded-xl px-4 py-3"/>
           <textarea name="notes" placeholder="Order notes (optional)" className="border rounded-xl px-4 py-3 md:col-span-2 min-h-28"/>
         </div>
+        <button type="submit" className="w-full mt-6 rounded-2xl py-5 px-5 font-bold text-lg flex items-center justify-center gap-3 bg-emerald-950 text-white hover:bg-emerald-900"><Mail size={24}/> Order via Email</button>
       </form>
-      <button type="button" onClick={openEmail} className="w-full mt-6 rounded-2xl py-5 px-5 font-bold text-lg flex items-center justify-center gap-3 bg-emerald-950 text-white hover:bg-emerald-900">
-        <Mail size={24}/> Order via Email
-      </button>
+      <a href={mailHref} className="block text-center mt-4 text-sm font-bold text-emerald-800 underline">Open email directly</a>
       </>}
     </section>
     <aside className="bg-emerald-950 text-white rounded-3xl p-6 h-fit lg:sticky lg:top-28">
