@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle2, Mail } from 'lucide-react';
-import { cartTotal, getCart, type CartItem } from '../lib/cart';
+import { cartTotal, clearCart, getCart, type CartItem } from '../lib/cart';
 
 const ORDER_EMAIL='info@rootrevolution.co.za';
 const FORM_ENDPOINT=`https://formsubmit.co/ajax/${ORDER_EMAIL}`;
@@ -52,7 +52,13 @@ export default function Checkout(){
         body:JSON.stringify(payload)
       });
       const data=await response.json().catch(()=>null);
-      if(!response.ok || data?.success===false) throw new Error('Order could not be sent.');
+      // FormSubmit can return HTTP 200 with success: 'false' (a string),
+      // for example when the recipient still needs to activate the form.
+      // Never show customers a successful order unless the service confirms it.
+      if(!response.ok || (data?.success !== 'true' && data?.success !== true)) {
+        throw new Error('Order could not be accepted by the email service.');
+      }
+      clearCart();
       setSent(true);
       form.reset();
       window.scrollTo({top:0,left:0,behavior:'smooth'});
@@ -67,9 +73,9 @@ export default function Checkout(){
     <section>
       <span className="section-tag">Order Root Revolution Products</span>
       <h1 className="text-4xl md:text-5xl font-bold text-emerald-950">Complete Your Order</h1>
-      {!items.length?<div className="bg-white rounded-3xl p-8 border mt-8"><p className="font-bold text-lg">Your cart is empty.</p><Link to="/shop" className="text-emerald-700 font-bold inline-block mt-3">Return to shop →</Link></div>:sent?<div className="bg-white rounded-3xl border border-emerald-100 shadow-sm p-8 mt-8 text-center"><CheckCircle2 className="mx-auto text-emerald-700" size={54}/><h2 className="text-2xl font-bold text-emerald-950 mt-4">Order Sent Successfully</h2><p className="text-stone-600 mt-2">Thank you. Your order has been sent directly to Root Revolution. We will contact you using the details you provided.</p><Link to="/shop" className="btn-green inline-flex mt-6">Continue Shopping</Link></div>:<form onSubmit={submitOrder} className="bg-white rounded-3xl border border-stone-100 shadow-sm p-6 mt-8">
+      {!items.length?<div className="bg-white rounded-3xl p-8 border mt-8"><p className="font-bold text-lg">Your cart is empty.</p><Link to="/shop" className="text-emerald-700 font-bold inline-block mt-3">Return to shop →</Link></div>:sent?<div className="bg-white rounded-3xl border border-emerald-100 shadow-sm p-8 mt-8 text-center"><CheckCircle2 className="mx-auto text-emerald-700" size={54}/><h2 className="text-2xl font-bold text-emerald-950 mt-4">Order Sent Successfully</h2><p className="text-stone-600 mt-2">Thank you. Your order request has been submitted to Root Revolution at info@rootrevolution.co.za. We will contact you using the details you provided.</p><Link to="/shop" className="btn-green inline-flex mt-6">Continue Shopping</Link></div>:<form onSubmit={submitOrder} className="bg-white rounded-3xl border border-stone-100 shadow-sm p-6 mt-8">
         <h2 className="text-xl font-bold text-emerald-950">Customer & Delivery Details</h2>
-        <p className="text-stone-500 mt-2">Complete your details below. Your order will be sent directly to Root Revolution.</p>
+        <p className="text-stone-500 mt-2">Complete your details below. Your order will be emailed to info@rootrevolution.co.za.</p>
         <div className="grid md:grid-cols-2 gap-4 mt-5">
           <input required name="name" placeholder="Full name" className="border rounded-xl px-4 py-3"/>
           <input required name="phone" placeholder="Phone number" className="border rounded-xl px-4 py-3"/>
@@ -82,7 +88,7 @@ export default function Checkout(){
           <textarea name="notes" placeholder="Order notes (optional)" className="border rounded-xl px-4 py-3 md:col-span-2 min-h-28"/>
         </div>
         {error&&<p className="mt-4 rounded-xl bg-red-50 border border-red-100 text-red-700 px-4 py-3 font-semibold">{error}</p>}
-        <button disabled={sending} type="submit" className="w-full mt-6 rounded-2xl py-5 px-5 font-bold text-lg flex items-center justify-center gap-3 bg-emerald-950 text-white hover:bg-emerald-900 disabled:opacity-60"><Mail size={24}/>{sending?'Sending Order...':'Place Order'}</button>
+        <button disabled={sending} type="submit" className="w-full mt-6 rounded-2xl py-5 px-5 font-bold text-lg flex items-center justify-center gap-3 bg-emerald-950 text-white hover:bg-emerald-900 disabled:opacity-60"><Mail size={24}/>{sending?'Sending Order...':'Send Order'}</button>
       </form>}
     </section>
     <aside className="bg-emerald-950 text-white rounded-3xl p-6 h-fit lg:sticky lg:top-28">
