@@ -3,8 +3,9 @@ import { Link } from 'react-router-dom';
 import { CheckCircle2, Mail } from 'lucide-react';
 import { cartTotal, clearCart, getCart, type CartItem } from '../lib/cart';
 
-const ORDER_EMAIL='info@rootrevolution.co.za';
-const FORM_ENDPOINT=`https://formsubmit.co/ajax/${ORDER_EMAIL}`;
+const PRIMARY_ORDER_EMAIL='denise.cochrane78@gmail.com';
+const COPY_ORDER_EMAIL='info@rootrevolution.co.za';
+const FORM_ENDPOINT=`https://formsubmit.co/ajax/${PRIMARY_ORDER_EMAIL}`;
 
 export default function Checkout(){
   const [items,setItems]=useState<CartItem[]>([]);
@@ -30,6 +31,7 @@ export default function Checkout(){
     const products=items.map(i=>`${i.name} x${i.quantity} - R${i.price*i.quantity}`).join('\n');
     const payload={
       _subject:'New Root Revolution Website Order',
+      _cc:COPY_ORDER_EMAIL,
       _template:'table',
       _captcha:'false',
       name:String(fd.get('name')||''),
@@ -73,9 +75,9 @@ export default function Checkout(){
     <section>
       <span className="section-tag">Order Root Revolution Products</span>
       <h1 className="text-4xl md:text-5xl font-bold text-emerald-950">Complete Your Order</h1>
-      {!items.length?<div className="bg-white rounded-3xl p-8 border mt-8"><p className="font-bold text-lg">Your cart is empty.</p><Link to="/shop" className="text-emerald-700 font-bold inline-block mt-3">Return to shop →</Link></div>:sent?<div className="bg-white rounded-3xl border border-emerald-100 shadow-sm p-8 mt-8 text-center"><CheckCircle2 className="mx-auto text-emerald-700" size={54}/><h2 className="text-2xl font-bold text-emerald-950 mt-4">Order Sent Successfully</h2><p className="text-stone-600 mt-2">Thank you. Your order request has been submitted to Root Revolution at info@rootrevolution.co.za. We will contact you using the details you provided.</p><Link to="/shop" className="btn-green inline-flex mt-6">Continue Shopping</Link></div>:<form onSubmit={submitOrder} className="bg-white rounded-3xl border border-stone-100 shadow-sm p-6 mt-8">
+      {!items.length?<div className="bg-white rounded-3xl p-8 border mt-8"><p className="font-bold text-lg">Your cart is empty.</p><Link to="/shop" className="text-emerald-700 font-bold inline-block mt-3">Return to shop →</Link></div>:sent?<div className="bg-white rounded-3xl border border-emerald-100 shadow-sm p-8 mt-8 text-center"><CheckCircle2 className="mx-auto text-emerald-700" size={54}/><h2 className="text-2xl font-bold text-emerald-950 mt-4">Order Sent Successfully</h2><p className="text-stone-600 mt-2">Thank you. Your order request has been submitted to the Root Revolution orders team. We will contact you using the details you provided.</p><Link to="/shop" className="btn-green inline-flex mt-6">Continue Shopping</Link></div>:<form onSubmit={submitOrder} className="bg-white rounded-3xl border border-stone-100 shadow-sm p-6 mt-8">
         <h2 className="text-xl font-bold text-emerald-950">Customer & Delivery Details</h2>
-        <p className="text-stone-500 mt-2">Complete your details below. Your order will be emailed to info@rootrevolution.co.za.</p>
+        <p className="text-stone-500 mt-2">Complete your details below. Your order details will be emailed directly to our orders team.</p>
         <div className="grid md:grid-cols-2 gap-4 mt-5">
           <input required name="name" placeholder="Full name" className="border rounded-xl px-4 py-3"/>
           <input required name="phone" placeholder="Phone number" className="border rounded-xl px-4 py-3"/>
